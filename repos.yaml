@@ -1,0 +1,69 @@
+# Source of truth: https://github.com/canonical/reference-sdks
+repos:
+  - url: https://github.com/canonical/claude-code-sdk
+    category: AI Agents & Coding Assistants
+  - url: https://github.com/canonical/codex-sdk
+    category: AI Agents & Coding Assistants
+  - url: https://github.com/canonical/copilot-sdk
+    category: AI Agents & Coding Assistants
+  - url: https://github.com/canonical/opencode-sdk
+    category: AI Agents & Coding Assistants
+
+  - url: https://github.com/canonical/go-sdk
+    category: Languages & Runtimes
+  - url: https://github.com/canonical/node-sdk
+    category: Languages & Runtimes
+  - url: https://github.com/canonical/rust-sdk
+    category: Languages & Runtimes
+  - url: https://github.com/canonical/dotnet-sdk
+    category: Languages & Runtimes
+  - url: https://github.com/canonical/flutter-sdk
+    category: Languages & Runtimes
+  - url: https://github.com/canonical/uv-sdk
+    category: Languages & Runtimes
+
+  - url: https://github.com/canonical/cuda-toolkit-sdk
+    category: GPU & Hardware Acceleration
+  - url: https://github.com/canonical/rocm-sdk
+    category: GPU & Hardware Acceleration
+  - url: https://github.com/canonical/openvino-sdk
+    category: GPU & Hardware Acceleration
+
+  - url: https://github.com/canonical/ollama-sdk
+    category: AI / ML Model Serving
+  - url: https://github.com/canonical/comfy-ui-sdk
+    category: AI / ML Model Serving
+
+  - url: https://github.com/canonical/zephyr-sdk
+    category: Embedded Systems & RTOS
+  - url: https://github.com/canonical/zephyr-sdk-ng
+    category: Embedded Systems & RTOS
+  - url: https://github.com/canonical/zephyr-amd64-sdk
+    category: Embedded Systems & RTOS
+  - url: https://github.com/canonical/zephyr-arm-sdk
+    category: Embedded Systems & RTOS
+  - url: https://github.com/canonical/zephyr-arm64-sdk
+    category: Embedded Systems & RTOS
+  - url: https://github.com/canonical/zephyr-riscv64-sdk
+    category: Embedded Systems & RTOS
+  - url: https://github.com/canonical/zephyr-xtensa-espressif-esp32-sdk
+    category: Embedded Systems & RTOS
+  - url: https://github.com/canonical/zephyr-xtensa-espressif-esp32s3-sdk
+    category: Embedded Systems & RTOS
+
+  - url: https://github.com/canonical/ros2-minimal-sdk
+    category: Robotics
+
+  - url: https://github.com/canonical/docker-sdk
+    category: Developer Tools & Infrastructure
+  - url: https://github.com/canonical/direnv-sdk
+    category: Developer Tools & Infrastructure
+  - url: https://github.com/canonical/vscode-remote-sdk
+    category: Developer Tools & Infrastructure
+  - url: https://github.com/canonical/github-runner-sdk
+    category: Developer Tools & Infrastructure
+  - url: https://github.com/canonical/jupyter-sdk
+    category: Developer Tools & Infrastructure
+
+  - url: https://github.com/canonical/template-sdk
+    category: Utilities & Templates
