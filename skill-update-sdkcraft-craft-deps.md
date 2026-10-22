@@ -40,9 +40,7 @@ Other `craft-*` dependencies may be included if present in `pyproject.toml` or `
 ### 1. Setup `canonical/sdkcraft`
 
 Use the "Working with a managed repo" workflow in `AGENTS.md`, even though
-`sdkcraft` is not listed in `repos.yaml`. Clone `canonical/sdkcraft` into
-`tmp/sdkcraft/` if it is not already present; otherwise fetch `origin`. Do not
-create a fork or add an `upstream` remote.
+`sdkcraft` is not listed in `repos.yaml`.
 
 Important machine quirk: if plain `gh` is unavailable, run GitHub CLI commands via:
 
@@ -220,7 +218,7 @@ Recommended subset:
 
 For each selected SDK:
 
-1. Use the "Working with a managed repo" workflow in this repo's `AGENTS.md` if the repo is not already present under `tmp/<repo>/`. If the local clone exists, fetch `origin`.
+1. Use the "Working with a managed repo" workflow in this repo's `AGENTS.md` to prepare any selected SDK that is not already present.
 2. Check out a clean branch from `origin/main` or use a detached worktree state that does not modify the repo.
 3. If the SDK needs a local `VERSION` file from a release branch, use the convention from `skill-add-ubuntu-base.md`:
    ```sh

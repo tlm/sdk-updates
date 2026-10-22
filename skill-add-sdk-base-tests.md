@@ -36,9 +36,7 @@ For each target repo (`canonical/<repo>`):
 
 ### 1. Setup
 
-Follow the "Working with a managed repo" workflow in `AGENTS.md`. Clone
-`canonical/<repo>` into `tmp/<repo>/` if it is not already present; otherwise
-fetch `origin`. Do not create a fork or add an `upstream` remote.
+Follow the "Working with a managed repo" workflow in `AGENTS.md`.
 
 ### 2. Branch off canonical main
 

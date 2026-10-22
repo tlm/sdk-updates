@@ -6,23 +6,36 @@ This repo coordinates bulk mechanical updates to SDK artifacts that we publish. 
 
 Before performing any work on a repo from `repos.yaml`, or on another
 Canonical repo named by a skill, follow this workflow. The user is expected to
-have write access to the canonical repository, so no fork is created.
+have write access to the canonical repository, so no fork is created. The
+same location and naming rules apply to supporting or upstream repositories
+cloned for research. Skills should reference this section rather than repeat
+its rules.
 
-1. **Clone the canonical repo directly** into `tmp/<repo-name>/` inside this
-   repo. `tmp/` is gitignored. This makes `origin` point at
-   `https://github.com/canonical/<repo-name>`.
+1. **Clone the repository directly** into `tmp/<repo-name>/` at the root of
+   this repository. `<repo-name>` is exactly the GitHub repository name,
+   without a `.git` suffix or extra suffixes such as `-upstream`, `-fork`, or
+   `-qa`. For example, `canonical/opencode-sdk` goes in `tmp/opencode-sdk/`
+   and `anomalyco/opencode` goes in `tmp/opencode/`. Never clone into `/tmp`
+   or any other location. `tmp/` is gitignored. For managed repos this makes
+   `origin` point at `https://github.com/canonical/<repo-name>`.
 2. **Do not add an `upstream` remote.** Canonical base branches are reached
    through `origin`, for example `origin/main` and `origin/latest`.
-3. **Reuse an existing clone** under `tmp/<repo-name>/` by fetching `origin`.
-   If an old clone has `origin` pointing at a personal fork and `upstream`
-   pointing at canonical, re-point `origin` at canonical and remove
-   `upstream` only after checking for unpushed work. If unsure, re-clone.
+3. **Reuse a clone only when it matches the repository.** Check that the
+   existing `tmp/<repo-name>/` has the expected `origin` URL, then fetch
+   `origin`. If an old clone has `origin` pointing at a personal fork and
+   `upstream` pointing at canonical, re-point `origin` at canonical and
+   remove `upstream` only after checking for unpushed work. If unsure,
+   re-clone.
 4. **Branch from the canonical base**:
 
    ```
    git fetch origin --prune
    git checkout -B <branch> origin/<base>
    ```
+
+Non-repository scratch directories may use a suffix only when a skill names
+one explicitly, for example `tmp/<repo-name>-qa/`. Never clone a repository
+into a suffixed directory.
 
 ### Branch naming
 

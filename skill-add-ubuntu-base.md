@@ -24,9 +24,7 @@ For each target repo (`canonical/<repo>`):
 
 ### 1. Setup
 
-Follow the "Working with a managed repo" workflow in `AGENTS.md`. Clone
-`canonical/<repo>` into `tmp/<repo>/` if it is not already present; otherwise
-fetch `origin`. Do not create a fork or add an `upstream` remote.
+Follow the "Working with a managed repo" workflow in `AGENTS.md`.
 
 ### 2. Branch off canonical main
 ```
@@ -99,7 +97,7 @@ Otherwise:
 
 1. Locate the packed SDK file for `<host-arch>` and the new version. Pattern C produces `<name>_<host-arch>_ubuntu@<version>.sdk`; Pattern A/B produces `<name>_<host-arch>.sdk`. The file is at the repo root after step 5.
 2. `sdkcraft try <path-to-sdk>` — copies it into the workshop try area as `try-<name>`. The output line confirms the SDK name.
-3. Create a sibling QA workspace `tmp/<repo>-qa/` (sibling to `tmp/<repo>/`). Write a minimal `workshop.yaml` modelled on the SDK's `README.md` example, but pinned to the new base and using the try-SDK:
+3. Create a sibling QA workspace `tmp/<repo-name>-qa/` (sibling to `tmp/<repo-name>/`). Write a minimal `workshop.yaml` modelled on the SDK's `README.md` example, but pinned to the new base and using the try-SDK:
    ```yaml
    name: <name>-try
    base: ubuntu@<version>
@@ -243,4 +241,4 @@ After processing all repos, report:
 - Repos with PRs opened (include PR URLs; note whether the workshop probe ran or was skipped)
 - Repos already on `<version>` (skipped)
 - Repos where the pattern was unrecognized (need manual review)
-- Repos where `sdkcraft pack`, `sdkcraft test`, or the workshop probe failed (include the failing step and the branch name so the user can pick up the working tree under `tmp/<repo>/`)
+- Repos where `sdkcraft pack`, `sdkcraft test`, or the workshop probe failed (include the failing step and the branch name so the user can pick up the working tree under `tmp/<repo-name>/`)

@@ -23,9 +23,7 @@ Forward merge `main` into a channel branch across the selected repos in `repos.y
 For each target repo (`canonical/<repo>`):
 
 ### 1. Setup
-Follow the "Working with a managed repo" workflow in `AGENTS.md`. Clone
-`canonical/<repo>` into `tmp/<repo>/` if it is not already present; otherwise
-fetch `origin`. Do not create a fork or add an `upstream` remote.
+Follow the "Working with a managed repo" workflow in `AGENTS.md`.
 
 **Resume detection.** Before doing anything else, check whether a prior run left an in-progress merge on a `forward-merge/...` branch:
 
@@ -64,7 +62,7 @@ If conflicts arise:
   Keep this inside `.git/` so it's automatically ignored by git.
 - Record the repo, the conflicting paths, and the branch name (`forward-merge/main-into-<channel>-<SHA>`) for the final summary of this run.
 - Do not commit, push, or open a PR for this repo.
-- Continue with the next repo. Conflicts in one repo do not block others (each repo has its own `tmp/<repo>/` directory).
+- Continue with the next repo. Conflicts in one repo do not block others (each repo has its own `tmp/<repo-name>/` directory).
 
 ### Resuming after conflict resolution
 Entered from step 1 when an in-progress merge is detected on a `forward-merge/...` branch.
