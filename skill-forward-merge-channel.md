@@ -1,6 +1,6 @@
 ---
 name: forward-merge-channel
-description: Forward merge `main` into a channel branch (e.g. `latest`) across one, several, or all SDK repos in repos.yaml. Builds with `sdkcraft pack`, runs `sdkcraft test` when a `tests/` directory exists, commits with a conventional commit message, pushes to the user's fork, and opens a PR against the canonical channel branch. Use when the user asks to "forward merge", "update the latest channel", "sync channel branches", or similar.
+description: Forward merge `main` into a channel branch (e.g. `latest`) across one, several, or all SDK repos in repos.yaml. Builds with `sdkcraft pack`, runs `sdkcraft test` when a `tests/` directory exists, commits with a conventional commit message, pushes the task branch to canonical, and opens a PR against the canonical channel branch. Use when the user asks to "forward merge", "update the latest channel", "sync channel branches", or similar.
 ---
 
 # Forward merge channel
@@ -23,7 +23,9 @@ Forward merge `main` into a channel branch across the selected repos in `repos.y
 For each target repo (`canonical/<repo>`):
 
 ### 1. Setup
-Follow `AGENTS.md` — ensure the repo is forked, cloned into `tmp/<repo>/`, and that `upstream` points to `canonical/<repo>`. If the local clone already exists, fetch both remotes instead of re-cloning.
+Follow the "Working with a managed repo" workflow in `AGENTS.md`. Clone
+`canonical/<repo>` into `tmp/<repo>/` if it is not already present; otherwise
+fetch `origin`. Do not create a fork or add an `upstream` remote.
 
 **Resume detection.** Before doing anything else, check whether a prior run left an in-progress merge on a `forward-merge/...` branch:
 
@@ -34,24 +36,24 @@ If both hold, the previous run stopped on conflicts and the user has been resolv
 
 ### 2. Determine commits to merge
 ```
-git fetch upstream
-git log --oneline upstream/<channel>..upstream/main
+git fetch origin --prune
+git log --oneline origin/<channel>..origin/main
 ```
 If the output is empty, the channel is already up to date — skip this repo and note it in the summary.
 
-Capture the upstream main short sha:
+Capture the canonical main short sha:
 ```
-SHA=$(git rev-parse --short upstream/main)
+SHA=$(git rev-parse --short origin/main)
 ```
 
-### 3. Create the forward-merge branch from the upstream channel tip
+### 3. Create the forward-merge branch from the canonical channel tip
 ```
-git checkout -B forward-merge/main-into-<channel>-<SHA> upstream/<channel>
+git checkout -B forward-merge/main-into-<channel>-<SHA> origin/<channel>
 ```
 
 ### 4. Merge main, deferring the commit
 ```
-git merge upstream/main --no-ff --no-commit
+git merge origin/main --no-ff --no-commit
 ```
 If conflicts arise:
 - **Do not abort the merge.** Leave the conflicted working tree in place so the user can resolve it manually.
@@ -106,18 +108,18 @@ Resolved conflicts:
 
 Keep it simple — no extra prose. After committing, remove the conflict file: `rm -f .git/forward-merge-conflicts.txt`.
 
-### 8. Push to the user's fork
+### 8. Push the task branch
 ```
-git push origin forward-merge/main-into-<channel>-<SHA>
+git push -u origin forward-merge/main-into-<channel>-<SHA>
 ```
-Do **not** push to `upstream`.
+Never push directly to `main`, a channel branch, or a release branch.
 
 ### 9. Open the PR against canonical
 ```
 gh pr create \
   --repo canonical/<repo> \
   --base <channel> \
-  --head <user>:forward-merge/main-into-<channel>-<SHA> \
+  --head forward-merge/main-into-<channel>-<SHA> \
   --title "chore: forward merge main into <channel>" \
   --body "<body>"
 ```

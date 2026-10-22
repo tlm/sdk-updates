@@ -1,6 +1,6 @@
 ---
 name: add-sdk-base-tests
-description: Add a strong baseline Spread test suite to one or more SDK repos from repos.yaml. Forks/clones each canonical SDK using the standard tmp/ workflow, inspects sdkcraft.yaml and SDK hooks to design repo-specific workshop tests, adds tests/spread.yaml plus focused tests/main/* tasks for launch, PATH, version/toolchain, cache/configuration, and setup-project idempotency where applicable, validates with sdkcraft pack and sdkcraft test, commits, pushes to the user's fork, and opens a PR against canonical main. Use when the user asks to add base tests, improve SDK test coverage, add Spread/workshop tests, or create initial tests for an SDK repo.
+description: Add a strong baseline Spread test suite to one or more SDK repos from repos.yaml. Clones each canonical SDK directly using the standard tmp/ workflow, inspects sdkcraft.yaml and SDK hooks to design repo-specific workshop tests, adds tests/spread.yaml plus focused tests/main/* tasks for launch, PATH, version/toolchain, cache/configuration, and setup-project idempotency where applicable, validates with sdkcraft pack and sdkcraft test, commits, pushes the task branch to canonical, and opens a PR against `main`. Use when the user asks to add base tests, improve SDK test coverage, add Spread/workshop tests, or create initial tests for an SDK repo.
 ---
 
 # Add SDK base tests
@@ -36,32 +36,19 @@ For each target repo (`canonical/<repo>`):
 
 ### 1. Setup
 
-Follow `AGENTS.md` for the fork/clone/remotes workflow. Do not call `gh repo fork canonical/<repo>` blindly:
+Follow the "Working with a managed repo" workflow in `AGENTS.md`. Clone
+`canonical/<repo>` into `tmp/<repo>/` if it is not already present; otherwise
+fetch `origin`. Do not create a fork or add an `upstream` remote.
 
-1. Determine the GitHub user:
-   ```sh
-   gh api user --jq .login
-   ```
-2. Check whether `<user>/<repo>` already exists:
-   ```sh
-   gh api repos/<user>/<repo>
-   ```
-3. Interpret the result:
-   - **404 (not found)**: run `gh repo fork canonical/<repo> --clone=false`.
-   - **200, `fork: true`, `parent.full_name == "canonical/<repo>"`**: reuse the existing fork.
-   - **200, `fork: true`, but `parent.full_name` differs**: stop and surface the conflict.
-   - **200, `fork: false`**: a same-named non-fork exists. Stop and ask the user how to proceed. Do not call `gh repo fork`, because GitHub may create `<repo>-1` silently.
-4. Clone `<user>/<repo>` into `tmp/<repo>/` if it does not already exist. If it exists, fetch both remotes.
-5. Ensure `origin` points to the user's fork and `upstream` points to `https://github.com/canonical/<repo>`.
-
-### 2. Branch off upstream main
+### 2. Branch off canonical main
 
 ```sh
-git fetch upstream
-git checkout -B test/add-base-spread-suite upstream/main
+git fetch origin --prune
+git checkout -B test/add-base-spread-suite origin/main
 ```
 
-If the branch already exists locally, reset it to `upstream/main` only after checking that it does not contain uncommitted user work.
+If the branch already exists locally, reset it to `origin/main` only after
+checking that it does not contain uncommitted user work.
 
 ### 3. Inspect the SDK before writing tests
 
@@ -73,7 +60,7 @@ Read and understand the repo before creating files:
 - `.github/workflows/upload.yml`, if present
 - `hooks/` or any setup/check-health files used by the SDK
 - existing `tests/`, if present
-- `VERSION`, if present on `main`; otherwise check whether `upstream/latest:VERSION` exists
+- `VERSION`, if present on `main`; otherwise check whether `origin/latest:VERSION` exists
 
 Identify:
 
@@ -126,7 +113,7 @@ Rules:
   ```yaml
   EXPECTED_VERSION: '$(HOST: cat "`git rev-parse --show-toplevel`/VERSION")'
   ```
-  Then fetch `VERSION` locally from `upstream/latest` before validation. Do not commit the local `VERSION` unless the repo already tracks it on `main`.
+  Then fetch `VERSION` locally from `origin/latest` before validation. Do not commit the local `VERSION` unless the repo already tracks it on `main`.
 - Keep the LXD backend at `ubuntu-24.04` unless the repo has a documented reason to use another host system.
 
 ### 5. Add common test scaffolding
@@ -283,7 +270,7 @@ Before committing:
 
 1. If `sdkcraft.yaml` or hooks read `VERSION` and `VERSION` is absent on `main`, fetch a local copy:
    ```sh
-   git show upstream/latest:VERSION > VERSION
+   git show origin/latest:VERSION > VERSION
    ```
    This is local-only. Do not commit it unless the repo already tracks `VERSION` on `main`.
 2. Run:
@@ -335,13 +322,13 @@ covers core user-facing behaviour:
 
 Adjust the bullet list to match what was actually added. Keep the commit focused on tests and ignore-file changes. If you also fix SDK behaviour uncovered by the tests, prefer a separate commit before the test commit with an appropriate `fix:` subject.
 
-### 10. Push to the user's fork
+### 10. Push the task branch
 
 ```sh
-git push origin test/add-base-spread-suite
+git push -u origin test/add-base-spread-suite
 ```
 
-Do not push to `upstream`.
+Never push directly to `main`, a channel branch, or a release branch.
 
 ### 11. Open the PR against canonical
 
@@ -349,7 +336,7 @@ Do not push to `upstream`.
 gh pr create \
   --repo canonical/<repo> \
   --base main \
-  --head <user>:test/add-base-spread-suite \
+  --head test/add-base-spread-suite \
   --title "test: add baseline workshop spread tests" \
   --body "<body>"
 ```

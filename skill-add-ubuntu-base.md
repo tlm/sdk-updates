@@ -1,6 +1,6 @@
 ---
 name: add-ubuntu-base
-description: Add support for a new Ubuntu LTS build base across one, several, or all SDK repos in repos.yaml. Detects which sdkcraft.yaml shape each repo uses (single `build-base:` / `base:` field vs. multi-base `platforms:` list), makes the appropriate edit, also updates `.github/workflows/upload.yml` for multi-base repos, builds with `sdkcraft pack`, runs `sdkcraft test` when a `tests/` directory exists, runs an end-to-end `workshop launch` probe on the new base when the host arch matches, commits, pushes to the user's fork, and opens a PR against canonical `main`. Use when the user asks to "add 26.04", "bump build-base", "add a new Ubuntu LTS", or similar.
+description: Add support for a new Ubuntu LTS build base across one, several, or all SDK repos in repos.yaml. Detects which sdkcraft.yaml shape each repo uses (single `build-base:` / `base:` field vs. multi-base `platforms:` list), makes the appropriate edit, also updates `.github/workflows/upload.yml` for multi-base repos, builds with `sdkcraft pack`, runs `sdkcraft test` when a `tests/` directory exists, runs an end-to-end `workshop launch` probe on the new base when the host arch matches, commits, pushes the task branch to canonical, and opens a PR against `main`. Use when the user asks to "add 26.04", "bump build-base", "add a new Ubuntu LTS", or similar.
 ---
 
 # Add Ubuntu base
@@ -24,24 +24,14 @@ For each target repo (`canonical/<repo>`):
 
 ### 1. Setup
 
-Follow `AGENTS.md` for the overall fork/clone/remotes setup. One important wrinkle when checking whether the user's fork already exists:
+Follow the "Working with a managed repo" workflow in `AGENTS.md`. Clone
+`canonical/<repo>` into `tmp/<repo>/` if it is not already present; otherwise
+fetch `origin`. Do not create a fork or add an `upstream` remote.
 
-**Do not** call `gh repo fork canonical/<repo>` blindly. If `<user>/<repo>` already exists as a **non-fork** (an unrelated repo of the same name), `gh repo fork` succeeds silently and creates `<user>/<repo>-1` as the actual fork, which then diverges from everything else and pollutes the user's account. Instead:
-
-1. `gh api repos/<user>/<repo>` and inspect the response:
-   - **404 (not found)**: no repo exists. Run `gh repo fork canonical/<repo> --clone=false` to create the fork.
-   - **200, `fork: true`, `parent.full_name == "canonical/<repo>"`**: reuse the existing fork. Skip the `gh repo fork` call.
-   - **200, `fork: true`, but `parent.full_name` is something else**: stop and surface the conflict — the existing fork is of a different upstream.
-   - **200, `fork: false`**: a same-named **non-fork** repo exists (e.g. the user maintains a parallel-history standalone repo of that name). Stop and ask the user how to proceed — do **not** call `gh repo fork` here, because it would create `<user>/<repo>-1` silently. The user may want to push from the existing non-fork repo directly (works if histories share commits) or delete it first.
-2. Clone `<user>/<repo>` into `tmp/<repo>/` if not already present; otherwise just `git fetch origin && git fetch upstream`.
-3. Ensure `upstream` points to `canonical/<repo>` (add it if missing).
-
-If the local clone already exists, fetch both remotes instead of re-cloning.
-
-### 2. Branch off upstream main
+### 2. Branch off canonical main
 ```
-git fetch upstream
-git checkout -B add-ubuntu-<version>-base upstream/main
+git fetch origin --prune
+git checkout -B add-ubuntu-<version>-base origin/main
 ```
 
 ### 3. Detect the sdkcraft.yaml pattern
@@ -72,7 +62,7 @@ After editing, sanity-check with `git diff` to make sure the change matches the 
 **VERSION caveat (most SDKs).** Many SDKs in the inventory keep `VERSION` only on the `latest` branch — `main` is deliberately VERSION-less. If `sdkcraft.yaml`'s `override-pull` reads `$CRAFT_PROJECT_DIR/VERSION`, pack will fail on the bump branch unless you drop a local copy first:
 
 ```
-git show upstream/latest:VERSION > VERSION
+git show origin/latest:VERSION > VERSION
 ```
 
 This is **local-only**: do **not** `git add` it, and ensure it's gone before the commit in step 8 (`rm VERSION`). If the repo's `main` already carries a `VERSION` file, skip this step.
@@ -168,18 +158,18 @@ Before either commit, **remove any local-only files** dropped during validation:
 
 Keep messages simple — no extra prose beyond the templates.
 
-### 9. Push to the user's fork
+### 9. Push the task branch
 ```
-git push origin add-ubuntu-<version>-base
+git push -u origin add-ubuntu-<version>-base
 ```
-Do **not** push to `upstream`.
+Never push directly to `main`, a channel branch, or a release branch.
 
 ### 10. Open the PR against canonical
 ```
 gh pr create \
   --repo canonical/<repo> \
   --base main \
-  --head <user>:add-ubuntu-<version>-base \
+  --head add-ubuntu-<version>-base \
   --title "<title>" \
   --body "<body>"
 ```

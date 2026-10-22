@@ -1,6 +1,6 @@
 ---
 name: update-sdkcraft-craft-deps
-description: Update sdkcraft's craft-* dependency pins to released minor versions. Forks and clones canonical/sdkcraft using the standard tmp/ workflow, evaluates released craft-* dependency updates, reviews release notes before changing pins, updates pyproject.toml and uv.lock only for safe minor-version bumps unless a major bump is explicitly requested, validates the update, commits, pushes to the user's fork, and opens a PR against canonical/sdkcraft main. Use when the user asks to update sdkcraft's craft dependencies, bring in craft-providers/craft-application/craft-platforms fixes, or refresh sdkcraft's craft-* pins.
+description: Update sdkcraft's craft-* dependency pins to released minor versions. Clones canonical/sdkcraft directly using the standard tmp/ workflow, evaluates released craft-* dependency updates, reviews release notes before changing pins, updates pyproject.toml and uv.lock only for safe minor-version bumps unless a major bump is explicitly requested, validates the update, commits, pushes the task branch to canonical/sdkcraft, and opens a PR against `main`. Use when the user asks to update sdkcraft's craft dependencies, bring in craft-providers/craft-application/craft-platforms fixes, or refresh sdkcraft's craft-* pins.
 ---
 
 # Update SDKcraft craft-* dependencies
@@ -39,7 +39,10 @@ Other `craft-*` dependencies may be included if present in `pyproject.toml` or `
 
 ### 1. Setup `canonical/sdkcraft`
 
-Use the same fork/clone/remotes pattern as managed SDK repos, even though `sdkcraft` is not listed in `repos.yaml`.
+Use the "Working with a managed repo" workflow in `AGENTS.md`, even though
+`sdkcraft` is not listed in `repos.yaml`. Clone `canonical/sdkcraft` into
+`tmp/sdkcraft/` if it is not already present; otherwise fetch `origin`. Do not
+create a fork or add an `upstream` remote.
 
 Important machine quirk: if plain `gh` is unavailable, run GitHub CLI commands via:
 
@@ -47,35 +50,17 @@ Important machine quirk: if plain `gh` is unavailable, run GitHub CLI commands v
 nix-shell -p gh --run 'gh ...'
 ```
 
-Before forking, avoid accidental `-1` forks:
-
-1. Determine the GitHub user:
-   ```sh
-   gh api user --jq .login
-   ```
-2. Check whether `<user>/sdkcraft` already exists:
-   ```sh
-   gh api repos/<user>/sdkcraft
-   ```
-3. Interpret the result:
-   - **404 (not found)**: run `gh repo fork canonical/sdkcraft --clone=false`.
-   - **200, `fork: true`, `parent.full_name == "canonical/sdkcraft"`**: reuse the existing fork.
-   - **200, `fork: true`, but `parent.full_name` is different**: stop and surface the conflict.
-   - **200, `fork: false`**: a same-named non-fork exists. Stop and ask the user how to proceed. Do not call `gh repo fork`, because GitHub may create `sdkcraft-1` silently.
-4. Clone `<user>/sdkcraft` into `tmp/sdkcraft/` if it does not already exist. If it exists, fetch both remotes.
-5. Ensure `origin` points to the user's fork and `upstream` points to `https://github.com/canonical/sdkcraft`.
-
-### 2. Branch off upstream main
+### 2. Branch off canonical main
 
 ```sh
-git fetch upstream
-git checkout -B chore/update-craft-dependencies upstream/main
+git fetch origin --prune
+git checkout -B chore/update-craft-dependencies origin/main
 ```
 
 If the user requested a single dependency, use a narrower branch name, for example:
 
 ```sh
-git checkout -B chore/update-craft-providers upstream/main
+git checkout -B chore/update-craft-providers origin/main
 ```
 
 ### 3. Identify current dependency state
@@ -235,11 +220,11 @@ Recommended subset:
 
 For each selected SDK:
 
-1. Use the standard fork/clone/upstream workflow from this repo's `AGENTS.md` if the repo is not already present under `tmp/<repo>/`. If the local clone exists, fetch both remotes.
-2. Check out a clean branch from `upstream/main` or use a detached worktree state that does not modify the repo.
+1. Use the "Working with a managed repo" workflow in this repo's `AGENTS.md` if the repo is not already present under `tmp/<repo>/`. If the local clone exists, fetch `origin`.
+2. Check out a clean branch from `origin/main` or use a detached worktree state that does not modify the repo.
 3. If the SDK needs a local `VERSION` file from a release branch, use the convention from `skill-add-ubuntu-base.md`:
    ```sh
-   git show upstream/latest:VERSION > VERSION
+   git show origin/latest:VERSION > VERSION
    ```
    Treat this as local-only and remove it after packing.
 4. Run `sdkcraft pack` using the locally installed snap.
@@ -290,13 +275,13 @@ Release notes were unavailable for <dependency>; reviewed git history between <o
 
 ### 11. Push
 
-Push only to the user's fork:
+Push the task branch to canonical:
 
 ```sh
-git push origin <branch>
+git push -u origin <branch>
 ```
 
-Do not push to `upstream`.
+Never push directly to `main`, a channel branch, or a release branch.
 
 ### 12. Open the PR
 
@@ -306,7 +291,7 @@ Open against `canonical/sdkcraft:main`:
 gh pr create \
   --repo canonical/sdkcraft \
   --base main \
-  --head <user>:<branch> \
+  --head <branch> \
   --title "chore(deps): <title>" \
   --body "<body>"
 ```
