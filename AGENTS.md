@@ -67,3 +67,18 @@ or `work`.
 - If pushing or opening the PR fails because of permissions, stop and report
   the failure. Do not create a fork or push to a personal remote as a
   workaround unless the user asks.
+
+## SDK testing practices
+
+- `workshop exec` already runs commands through a login shell as the
+  workshop user. Invoke commands directly, such as
+  `workshop exec -- command`; do not add `bash -lc` merely to load profile
+  configuration.
+- Only invoke an explicit shell when the test requires its specific syntax
+  or behaviour.
+- Keep tests version-independent when the behaviour is shared across SDK
+  versions. Prefer asserting effective behaviour over implementation
+  details.
+- Let `workshop remove` in the test's `restore` phase tear down workshop
+  services. Only stop services explicitly when their lifecycle is under
+  test or shutdown ordering matters.
