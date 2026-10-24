@@ -111,7 +111,7 @@ Rules:
   ```yaml
   EXPECTED_VERSION: '$(HOST: cat "`git rev-parse --show-toplevel`/VERSION")'
   ```
-  Then fetch `VERSION` locally from `origin/latest` before validation. Do not commit the local `VERSION` unless the repo already tracks it on `main`.
+  Then fetch `VERSION` locally from `origin/latest` before validation. Never commit this temporary file on `main`; remove it before the final status check.
 - Keep the LXD backend at `ubuntu-24.04` unless the repo has a documented reason to use another host system.
 
 ### 5. Add common test scaffolding
@@ -178,7 +178,7 @@ This catches basic pack/try/launch/check-health failures.
 
 Add `<command>-on-path` or `<sdk-name>-on-path`:
 
-- Run `workshop exec -- bash -lc 'command -v <command>'`.
+- Run `workshop exec -- command -v <command>`.
 - Match a path ending in `/<command>`.
 - If setup-base installs `/etc/profile.d/<name>.sh`, debug should print `PATH` and list that file.
 
@@ -193,7 +193,7 @@ Add `<command>-version`:
 - Escape dots before passing versions to `MATCH`:
   ```sh
   EXPECTED_REGEX="${EXPECTED_VERSION//./\\.}"
-  workshop exec -- bash -lc '<command> --version' | MATCH "$EXPECTED_REGEX"
+  workshop exec -- <command> --version | MATCH "$EXPECTED_REGEX"
   ```
 - If the upstream CLI prints a semver with prefixes, suffixes, or build metadata, match a precise stable fragment rather than the entire line.
 
@@ -270,7 +270,7 @@ Before committing:
    ```sh
    git show origin/latest:VERSION > VERSION
    ```
-   This is local-only. Do not commit it unless the repo already tracks `VERSION` on `main`.
+   This is local-only. Never commit this temporary file on `main`; remove it before the final status check.
 2. Run:
    ```sh
    sdkcraft pack

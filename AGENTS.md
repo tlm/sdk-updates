@@ -94,6 +94,29 @@ or `work`.
   the failure. Do not create a fork or push to a personal remote as a
   workaround unless the user asks.
 
+## SDK source conventions
+
+### Version files
+
+- `VERSION` belongs on release/version branches. Never commit it to `main`.
+- When local validation on `main` requires a `VERSION`, fetch it temporarily
+  from the applicable release branch. If no release branch exists yet, create
+  it temporarily using the version agreed in the design. Never stage or commit
+  this temporary file on `main`, and remove it before the final status check.
+
+### Interface names
+
+- For new SDKs, and for new plugs or slots added to an existing SDK, prefix
+  each interface name with the SDK's runtime name. This is normally the
+  repository name without the `-sdk` suffix. For example, `hindsight-sdk`
+  uses `hindsight-data`, `hindsight-config`, and `hindsight-api`.
+- Do not prefix singleton interfaces whose names are fixed by their contract,
+  including `gpu`, `desktop`, `camera`, and `ssh-agent`.
+- Do not rename existing committed plugs or slots merely to follow this
+  convention; preserve their names for compatibility unless the user
+  explicitly asks for a rename. The prefix rule applies only to new SDKs and
+  newly introduced interfaces.
+
 ## SDK testing practices
 
 - `workshop exec` already runs commands through a login shell as the

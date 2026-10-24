@@ -63,7 +63,7 @@ After editing, sanity-check with `git diff` to make sure the change matches the 
 git show origin/latest:VERSION > VERSION
 ```
 
-This is **local-only**: do **not** `git add` it, and ensure it's gone before the commit in step 8 (`rm VERSION`). If the repo's `main` already carries a `VERSION` file, skip this step.
+This is **local-only**: do **not** `git add` it, and ensure it's gone before the commit in step 8 (`rm VERSION`). If the repo's `main` already carries a tracked `VERSION`, do not overwrite or remove it; report the pre-existing deviation instead of creating a local copy. Never add `VERSION` to `main` or a task branch based on it.
 
 Run `sdkcraft pack` in the repo root. If it fails, record the failure and stop processing this repo (leave the working tree in place so the user can inspect — do not revert the edit).
 
@@ -106,7 +106,15 @@ Otherwise:
    ```
    Carry over a couple of `actions:` from the README example if present (they document intent; not strictly needed for the probe).
 4. From the QA workspace, run `workshop launch`. Then `workshop info` to confirm `status: ready`. If it doesn't reach ready, record the failure and stop — leave the workshop in place so the user can inspect.
-5. `workshop exec <name>-try -- bash -lc 'which <primary-binary> && <primary-binary> --version && grep PRETTY_NAME /etc/os-release'`. Pick `<primary-binary>` from the SDK's main CLI (e.g. `cargo` for rust-sdk, `claude` for claude-code-sdk, `opencode` for opencode-sdk, `codex` for codex-sdk). Confirm:
+5. Run these commands:
+   ```sh
+   workshop exec <name>-try -- which <primary-binary>
+   workshop exec <name>-try -- <primary-binary> --version
+   workshop exec <name>-try -- grep PRETTY_NAME /etc/os-release
+   ```
+   Pick `<primary-binary>` from the SDK's main CLI (e.g. `cargo` for
+   rust-sdk, `claude` for claude-code-sdk, `opencode` for opencode-sdk,
+   `codex` for codex-sdk). Confirm:
    - the binary resolves under `/var/lib/workshop/sdk/<name>/...`,
    - it reports a version,
    - `PRETTY_NAME` matches the target Ubuntu version.
@@ -211,10 +219,13 @@ If multiple arches were added in Pattern C, repeat the bullet per arch (or list 
   2. `sdkcraft try <sdk-filename>` — copied into the workshop try area as `try-<name>`.
   3. Wrote a `workshop.yaml` based on the README example, pinning `base: ubuntu@<version>` and `sdks: [{ name: try-<name> }]`.
   4. `workshop launch` → workshop `<name>-try` reached `Ready`.
-  5. `workshop exec <name>-try -- bash -lc 'which <primary-binary> && <primary-binary> --version && grep PRETTY_NAME /etc/os-release'`:
-     - `<binary-path>`
-     - `<version-line>`
-     - `PRETTY_NAME="Ubuntu <version> LTS"`
+  5. Workshop commands confirmed:
+     - `workshop exec <name>-try -- which <primary-binary>`:
+       `<binary-path>`
+     - `workshop exec <name>-try -- <primary-binary> --version`:
+       `<version-line>`
+     - `workshop exec <name>-try -- grep PRETTY_NAME /etc/os-release`:
+       `PRETTY_NAME="Ubuntu <version> LTS"`
   6. `workshop remove <name>-try` — clean teardown.
 
   Other-arch platform(s) not validated locally; CI will exercise them.
