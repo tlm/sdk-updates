@@ -2,6 +2,32 @@
 
 This repo coordinates bulk mechanical updates to SDK artifacts that we publish. The managed repos are listed in `repos.yaml`.
 
+## Workshop references
+
+All skills should consult these canonical references when a task depends on
+Workshop or SDKcraft commands, SDK definitions, configuration, architecture,
+or runtime behaviour:
+
+- **Workshop documentation:** <https://ubuntu.com/workshop/docs/> — the source
+  of truth for documented user-facing behaviour, including CLI commands,
+  workshop and SDK definitions, SDKcraft usage, SDK development, interfaces,
+  and troubleshooting.
+- **Workshop source repository:** <https://github.com/canonical/workshop> — use
+  the implementation, tests, and documentation source under `docs/` when the
+  public documentation does not answer a question or implementation details
+  matter.
+- **SDKcraft source repository:** <https://github.com/canonical/sdkcraft/> — use
+  the implementation, tests, and project schema when SDKcraft behaviour or
+  definition details require source-level confirmation.
+
+Documentation for SDK definitions and SDKcraft can be found through the
+Workshop documentation, including its SDK development guides and SDKcraft
+command reference. Prefer current documentation over assumptions or remembered
+command syntax. Check the source repositories when observed behaviour and
+documentation disagree, and report any unresolved discrepancy rather than
+guessing. Clone a source repository only when local source inspection is
+necessary, following the workflow below.
+
 ## Working with a managed repo
 
 Before performing any work on a repo from `repos.yaml`, or on another
