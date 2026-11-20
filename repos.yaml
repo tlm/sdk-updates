@@ -8,6 +8,8 @@ repos:
     category: AI Agents & Coding Assistants
   - url: https://github.com/canonical/opencode-sdk
     category: AI Agents & Coding Assistants
+  - url: https://github.com/canonical/pi-sdk
+    category: AI Agents & Coding Assistants
 
   - url: https://github.com/canonical/go-sdk
     category: Languages & Runtimes
