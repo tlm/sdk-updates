@@ -104,6 +104,17 @@ or `work`.
   it temporarily using the version agreed in the design. Never stage or commit
   this temporary file on `main`, and remove it before the final status check.
 
+### Shell scripts
+
+These rules apply to hooks, SDKcraft part overrides, wrappers, and test
+scripts.
+
+- Keep `if` conditions simple and easy to scan. Compute values and validation
+  results before the condition, then test variables or saved exit statuses.
+- Do not place `jq` pipelines or command substitutions directly in `if`
+  conditions. Handle command failures explicitly with `||` or a saved exit
+  status, then make the validation decision separately.
+
 ### Interface names
 
 - For new SDKs, and for new plugs or slots added to an existing SDK, prefix
@@ -116,6 +127,35 @@ or `work`.
   convention; preserve their names for compatibility unless the user
   explicitly asks for a rename. The prefix rule applies only to new SDKs and
   newly introduced interfaces.
+
+### Service definitions
+
+- Make SDK systemd units self-contained. Provide required non-secret settings
+  with `Environment=` entries or a dedicated, root-owned environment file,
+  and invoke the service executable directly with an absolute `ExecStart`
+  path.
+- Do not use `/bin/bash -lc` or another login shell merely to load profile
+  configuration. Shell profiles configure interactive commands and must not
+  be required for service startup.
+- Only invoke a shell when the service genuinely requires shell syntax or
+  behavior. In that case, use `exec` to replace the shell with the service
+  process so systemd tracks the workload directly.
+
+### Runtime hooks
+
+- Workshop invokes hooks with `errexit` and `pipefail` already enabled.
+  Removing `-e` from a later `set -euo pipefail` statement does not disable
+  the inherited behavior; use `set +e` explicitly when intended.
+- Expected probe failures in `check-health` are control flow, not unexpected
+  script failures. Capture the probe's output and exit status and translate
+  failures into `workshopctl set-health waiting` or `error`. A standalone
+  `output=$(command)` under `errexit` exits before the failure can be reported.
+- Either place the probe directly in an `if` condition or explicitly disable
+  `errexit` before capturing its status. If `errexit` remains disabled for the
+  whole hook, keep the hook small and ensure later failures cannot produce an
+  incorrect `okay` result; otherwise re-enable it immediately after capture.
+- Retain `nounset` and `pipefail` where useful rather than treating shell
+  options as boilerplate to copy or remove without considering their effect.
 
 ## SDK testing practices
 
