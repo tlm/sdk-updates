@@ -171,3 +171,8 @@ scripts.
 - Let `workshop remove` in the test's `restore` phase tear down workshop
   services. Only stop services explicitly when their lifecycle is under
   test or shutdown ordering matters.
+- Commit test-only in-project SDKs at `<task>/.workshop/<name>/` and
+  reference them as `project-<name>`. Workshop resolves `project-<name>`
+  to `<project>/.workshop/<name>`, and Spread runs each task from its own
+  directory, so the definition is used in place. Do not stage a copy into
+  `.workshop/` from `prepare`.
